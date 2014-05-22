@@ -91,6 +91,10 @@ cgminer_SOURCES += A1-board-selector-CCD.c A1-board-selector-CCR.c
 cgminer_SOURCES += A1-trimpot-mcp4x.h A1-trimpot-mcp4x.c
 endif
 
+if HAS_BE200
+cgminer_SOURCES += driver-BE200.c driver-BE200.h
+endif
+
 if HAS_DRILLBIT
 cgminer_SOURCES += driver-drillbit.c driver-drillbit.h
 endif
