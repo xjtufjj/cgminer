@@ -8,6 +8,26 @@ minerd.exe
 autom4te.cache
 .deps
 
+compat/jansson-2.5/jansson.pc
+compat/jansson-2.5/libtool
+compat/jansson-2.5/ltmain.sh
+compat/jansson-2.5/m4/libtool.m4
+compat/jansson-2.5/m4/ltoptions.m4
+compat/jansson-2.5/m4/ltsugar.m4
+compat/jansson-2.5/m4/ltversion.m4
+compat/jansson-2.5/m4/lt~obsolete.m4
+compat/jansson-2.5/src/jansson_config.h
+compat/libusb-1.0/libtool
+compat/libusb-1.0/libusb-1.0.pc
+compat/libusb-1.0/ltmain.sh
+libtool
+ltmain.sh
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
+
 Makefile
 Makefile.in
 INSTALL
