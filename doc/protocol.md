@@ -27,23 +27,29 @@ S:BE200 Blade
 
 * Self Test
 
-> T=1 L=0 D=NA
+> Send: T=1; L=0; D=NA
+> Recv: T=1; L=N; D=Self Test Result
 
 * Reset Chip
 
-> T=2 L=Chip Count D=[Chip ID]
+> Send: T=2; L=Chip Count; D=[Chip ID]
 
 * Tweak Chip Freq
 
-> T=3 L=2 D:Chip ID::Freq 
+> Send: T=3; L=2; D:Chip ID::Freq 
 
 * Send Job
 
-> T=4 L=45 D=Job ID::44 Byte Work(Job is clean)
-> T=5 L=45 D=Job ID::44 Byte Work(Job is not clean)
+> Send: T=4; L=45; D=Job ID::44 Byte Work(Job is clean)
+> Send: T=5; L=45; D=Job ID::44 Byte Work(Job is not clean)
 
 * Receive Nonce
 
-> T=6 L=6 D=Job ID::Ntime Roll::4 Byte Nonce
+> Recv: T=6; L=7; D=Job ID::Chip ID::Ntime Roll::4 Byte Nonce
+
+* Request Job
+> Recv: T=7; L=0; D=NA
+
+
 
 
