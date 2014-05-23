@@ -95,6 +95,10 @@ if HAS_BE200
 cgminer_SOURCES += driver-BE200.c driver-BE200.h
 endif
 
+if HAS_BTCMINE_BE200
+cgminer_SOURCES += driver-btcmine-BE200.c
+endif
+
 if HAS_DRILLBIT
 cgminer_SOURCES += driver-drillbit.c driver-drillbit.h
 endif
