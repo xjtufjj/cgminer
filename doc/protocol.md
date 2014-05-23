@@ -48,6 +48,7 @@ S:BE200 Blade
 > Recv: T=6; L=7; D=Job ID::Chip ID::Ntime Roll::4 Byte Nonce
 
 * Request Job
+
 > Recv: T=7; L=0; D=NA
 
 
