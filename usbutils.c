@@ -59,6 +59,7 @@ static cgtimer_t usb11_cgt;
 #define BITFURY_TIMEOUT_MS 999
 #define DRILLBIT_TIMEOUT_MS 999
 #define ICARUS_TIMEOUT_MS 999
+#define BTCMINE_BE200_TIMEOUT_MS 999
 
 // There is no windows version
 #define ANT_S1_TIMEOUT_MS 200
@@ -262,11 +263,21 @@ static struct usb_intinfo kli_ints[] = {
 };
 #endif
 
+#ifdef USE_BTCMINE_BE200
+static struct usb_epinfo be200_epinfos[] = {
+	{ LIBUSB_TRANSFER_TYPE_BULK,	64,	EPI(3), 0, 0 },
+	{ LIBUSB_TRANSFER_TYPE_BULK,	64,	EPO(2), 0, 0 }
+};
+static struct usb_intinfo be200_ints[] = {
+	USB_EPS(0, be200_epinfos)
+};
+#endif
 #ifdef USE_ICARUS
 static struct usb_epinfo ica_epinfos[] = {
 	{ LIBUSB_TRANSFER_TYPE_BULK,	64,	EPI(3), 0, 0 },
 	{ LIBUSB_TRANSFER_TYPE_BULK,	64,	EPO(2), 0, 0 }
 };
+
 
 static struct usb_intinfo ica_ints[] = {
 	USB_EPS(0, ica_epinfos)
@@ -547,6 +558,18 @@ static struct usb_find_devices find_dev[] = {
 		.timeout = KLONDIKE_TIMEOUT_MS,
 		.latency = 10,
 		INTINFO(kli_ints) },
+#endif
+#ifdef USE_BTCMINE_BE200
+	{
+		.drv = DRIVER_btcmine_be200,
+		.name = "ICA",
+		.ident = IDENT_BE200,
+		.idVendor = 0x067b,
+		.idProduct = 0x2303,
+		.config = 1,
+		.timeout = BTCMINE_BE200_TIMEOUT_MS,
+		.latency = LATENCY_UNUSED,
+		INTINFO(be200_ints) },
 #endif
 #ifdef USE_ICARUS
 	{

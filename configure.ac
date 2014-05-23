@@ -218,6 +218,17 @@ if test "x$BE200" = xyes; then
 fi
 AM_CONDITIONAL([HAS_BE200], [test x$BE200 = xyes])
 
+BTCMine_BE200="no"
+
+AC_ARG_ENABLE([BTCMine_BE200],
+	[AC_HELP_STRING([--enable-BTCMine_BE200],[Compile support for AsicMinner BE200 ASICs (default disabled)])],
+	[BTCMine_BE200=$enableval]
+	)
+if test "x$BTCMine_BE200" = xyes; then
+	AC_DEFINE([USE_BTCMINE_BE200], [1], [Defined to 1 if Bitmine A1 support is wanted])
+    fi
+AM_CONDITIONAL([HAS_BTCMINE_BE200], [test x$BTCMine_BE200 = xyes])
+
 
 drillbit="no"
 
@@ -347,7 +358,7 @@ else
 	])
 fi
 
-if test x$avalon$bitforce$bitfury$modminer$bflsc$icarus$BE200$hashfast$klondike$drillbit$cointerra$ants1 != xnonononononononononono; then
+if test x$avalon$bitforce$bitfury$modminer$bflsc$icarus$BE200$BTCMine_BE200$hashfast$klondike$drillbit$cointerra$ants1 != xnonononononononononono; then
 	want_usbutils=true
 else
 	want_usbutils=false
@@ -599,6 +610,11 @@ else
 	echo "  BE200 ASICs..........: Disabled"
 fi
 
+if test "x$BTCMine_BE200" = xyes; then
+	echo "  BTCMine_BE200........: Enabled"
+else
+	echo "  BTCMine_BE200........: Disabled"
+fi
 
 if test "x$drillbit" = xyes; then
 	echo "  Drillbit.BitFury.....: Enabled"
@@ -636,7 +652,7 @@ else
 	echo "  ModMiner.FPGAs.......: Disabled"
 fi
 
-if test "x$avalon$avalon2$bab$bflsc$bitforce$bitfury$hashfast$icarus$klondike$knc$modminer$drillbit$minion$cointerra$bitmine_A1$BE200$ants1$spondoolies" = xnonononononononononononononononono; then
+if test "x$avalon$avalon2$bab$bflsc$bitforce$bitfury$hashfast$icarus$klondike$knc$modminer$drillbit$minion$cointerra$bitmine_A1$BE200$BTCMine_BE200$ants1$spondoolies" = xnonononononononononononononononono; then
 	AC_MSG_ERROR([No mining configured in])
 fi
 

@@ -229,6 +229,10 @@ char *opt_bab_options = NULL;
 #ifdef USE_BITMINE_A1
 char *opt_bitmine_a1_options = NULL;
 #endif
+
+#ifdef USE_BTCMINE_BE200
+char *opt_btcmine_BE200_options = NULL;
+#endif
 #ifdef USE_ANT_S1
 char *opt_bitmain_options;
 static char *opt_set_bitmain_fan;
@@ -1187,6 +1191,11 @@ static struct opt_table opt_config_table[] = {
 		     opt_set_charp, NULL, &opt_bitmine_a1_options,
 		     "Bitmine A1 options ref_clk_khz:sys_clk_khz:spi_clk_khz:override_chip_num"),
 #endif
+#ifdef USE_BTCMINE_BE200
+	OPT_WITH_ARG("--btcmine-BE200-options",
+		     opt_set_charp, NULL, &opt_btcmine_BE200_options,
+		     "BTCmine BE200 override_chip_num"),
+#endif
 #ifdef USE_BITFURY
 	OPT_WITH_ARG("--bxf-bits",
 		     set_int_32_to_63, opt_show_intval, &opt_bxf_bits,
@@ -1666,6 +1675,9 @@ static char *opt_verusage_and_exit(const char *extra)
 #endif
 #ifdef USE_BITMINE_A1
 		"Bitmine.A1 "
+#endif
+#ifdef USE_BTCMINE_BE200
+		"Btcmine.BE200 "
 #endif
 #ifdef USE_SPONDOOLIES
 		"spondoolies "

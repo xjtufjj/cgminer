@@ -243,6 +243,7 @@ static inline int fsync (int fd)
 	DRIVER_ADD_COMMAND(klondike) \
 	DRIVER_ADD_COMMAND(knc) \
 	DRIVER_ADD_COMMAND(bitmineA1) \
+	DRIVER_ADD_COMMAND(btcmine_be200) \
 	DRIVER_ADD_COMMAND(drillbit) \
 	DRIVER_ADD_COMMAND(bab) \
 	DRIVER_ADD_COMMAND(minion) \
@@ -1008,6 +1009,9 @@ extern char *opt_bab_options;
 #endif
 #ifdef USE_BITMINE_A1
 extern char *opt_bitmine_a1_options;
+#endif
+#ifdef USE_BTCMINE_BE200
+extern char *opt_btcmine_BE200_options;
 #endif
 #ifdef USE_ANT_S1
 extern char *opt_bitmain_options;
