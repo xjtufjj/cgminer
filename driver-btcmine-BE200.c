@@ -74,11 +74,11 @@ enum BTCMINE_BE200_Command {
     BTCMINE_BE200_GET_NONCE = 0x06,
     BTCMINE_BE200_GET_NONCE_RSP = 0x86,
 
-    BTCMINE_BE200_DETECT = 0x07,
-    BTCMINE_BE200_DETECT_RSP = 0x87,
+    BTCMINE_BE200_REQUEST_JOB = 0x07,
+    BTCMINE_BE200_REQUEST_JOB_RSP = 0x87,
 
-    BTCMINE_BE200_IDLE_CHIP = 0x08,
-    BTCMINE_BE200_IDLE_CHIP_RSP = 0x88,
+    BTCMINE_BE200_DETECT = 0x08,
+    BTCMINE_BE200_DETECT_RSP = 0x88,
 
 };
 
@@ -134,8 +134,6 @@ struct be200_chain {
 	uint8_t temp;
 	int last_temp_time;
 };
-
-static int option_offset = -1;
 
 /*********************************************************************************
  *    USB  read write wrapper region
@@ -578,11 +576,11 @@ static uint8_t *cmd_BTCMINE_BE200_GET_NONCE(struct be200_chain *btcmine_be200)
     return ret;
 }
 
-static uint8_t *cmd_BTCMINE_BE200_IDLE_CHIP(struct be200_chain *btcmine_be200, uint8_t *resp_len)
+static uint8_t *cmd_BTCMINE_BE200_REQUEST_JOB(struct be200_chain *btcmine_be200, uint8_t *resp_len)
 {
     uint8_t *ret;
 
-    ret = exec_cmd(btcmine_be200, BTCMINE_BE200_IDLE_CHIP, NULL, 0, resp_len);
+    ret = exec_cmd(btcmine_be200, BTCMINE_BE200_REQUEST_JOB, NULL, 0, resp_len);
     if (!ret) {
 		applog(LOG_ERR, "%s failed", __func__);
     }
@@ -742,9 +740,10 @@ static bool set_work(struct be200_chain *btcmine_be200, uint8_t chip_id, struct 
 	return retval;
 }
 
-static bool get_nonce(struct be200_chain *btcmine_be200, uint8_t *nonce,
-		      uint8_t *chip, uint8_t *job_id)
+static bool get_nonce(struct be200_chain *btcmine_be200, uint8_t *nonce, 
+		      uint8_t *chip, uint8_t *job_id, uint32_t *NtimeRoll)
 {
+    uint32_t NtimeRollTmp;
 	uint8_t *ret = cmd_BTCMINE_BE200_GET_NONCE(btcmine_be200);
 
 	if (ret == NULL)
@@ -752,7 +751,9 @@ static bool get_nonce(struct be200_chain *btcmine_be200, uint8_t *nonce,
 
 	*job_id = ret[1];
 	*chip = ret[0];
-	memcpy(nonce, ret + 2, 4);
+    memcpy(NtimeRoll, ret + 2, 4);
+    *NtimeRoll = bswap_32(*NtimeRoll);
+	memcpy(nonce, ret + 6, 4);
 	return true;
 }
 
@@ -776,16 +777,12 @@ static bool abort_work(struct be200_chain *btcmine_be200)
     return false;
 }
 
-#define TEMP_UPDATE_INT_MS	2000
 static int64_t Btcmine_Be200_scanwork(struct thr_info *thr)
 {
 	int i;
 	struct cgpu_info *cgpu = thr->cgpu;
 	struct be200_chain *btcmine_be200 = cgpu->device_data;
 	int32_t nonce_ranges_processed = 0;
-
-	applog(LOG_DEBUG, "Btcmine Be200 running scanwork");
-
 	uint32_t nonce;
 	uint8_t chip_id;
 	uint8_t job_id;
@@ -793,15 +790,15 @@ static int64_t Btcmine_Be200_scanwork(struct thr_info *thr)
     int err;
     uint8_t *chips;
     uint8_t chip_num;
+    uint32_t NtimeRoll;
+
+	applog(LOG_DEBUG, "Btcmine Be200 running scanwork");
 
 	mutex_lock(&btcmine_be200->lock);
 
-	if (btcmine_be200->last_temp_time + TEMP_UPDATE_INT_MS < get_current_ms()) {
-		btcmine_be200->last_temp_time = get_current_ms();
-	}
 	/* poll queued results */
 	while (true) {
-		if (!get_nonce(btcmine_be200, (uint8_t*)&nonce, &chip_id, &job_id))
+		if (!get_nonce(btcmine_be200, (uint8_t*)&nonce, &chip_id, &job_id, &NtimeRoll))
 			break;
 		nonce = bswap_32(nonce);
 		work_updated = true;
@@ -822,7 +819,7 @@ static int64_t Btcmine_Be200_scanwork(struct thr_info *thr)
 			chip->stales++;
 			continue;
 		}
-		if (!submit_nonce(thr, work, nonce)) {
+		if (!submit_noffset_nonce(thr, work, nonce, NtimeRoll)) {
 			applog(LOG_WARNING, "chip %d: invalid nonce 0x%08x", chip_id, nonce);
 			chip->hw_errors++;
 			/* add a penalty of a full nonce range on HW errors */
@@ -834,17 +831,14 @@ static int64_t Btcmine_Be200_scanwork(struct thr_info *thr)
 	}
 
 	/* check for completed works */
-
-    chips = cmd_BTCMINE_BE200_IDLE_CHIP(btcmine_be200, &chip_num);
+    chips = cmd_BTCMINE_BE200_REQUEST_JOB(btcmine_be200, &chip_num);
     if (chips) {
         for (i = chip_num - 1; i >= 0; i--) {
 		    uint8_t c = chips[i];
             if (is_chip_disabled(btcmine_be200, c))
                 continue;
-		    struct work *work;
 		    struct be200_chip *chip = &btcmine_be200->chips[c]; //TODO C-1?
-
-			work = wq_dequeue(&btcmine_be200->active_wq);
+		    struct work *work = wq_dequeue(&btcmine_be200->active_wq);
 			if (work == NULL) {
 				applog(LOG_ERR, "chip %d: work underflow", c);
 				break;
